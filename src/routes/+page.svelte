@@ -1,6 +1,8 @@
 <script>
     import a from "../queries/a"
-    ;(async () => console.log(await a()))()
+    import "$lib/auth"
+    if(!import.meta.env.SSR) (async () => console.log(await invoke(a, undefined)))()
+    import { invoke } from "$lib";
 </script>
 <button on:click={async () => console.log(await a())}>button</button>
 <h1>Welcome to your library project</h1>
