@@ -4,9 +4,10 @@ import type { UserConfig } from 'vite';
 
 const config: UserConfig = {
 	plugins: [
-	    sveltekit(),
-	    viteBlitz()
-	]
+		sveltekit(),
+	    viteBlitz({modifiers: []}),
+	],
+	
 };
 
 export default config;

@@ -174,7 +174,7 @@ export const authPlugin = ({db}: {db: PrismaClient}): ViteServerBlitzPlugin => {
             if(!(await checkCsrfToken(csrfSecret, request.headers.get("csrf-token")))) throw new Error("Csrf token mismatch")
             const csrfToken = request.headers.get("csrf-token") == null && cookies.get("token") == null ? (await import("./auth-token")).tokens.create(csrfSecret) : request.headers.get("csrf-token")
             if(csrfToken == null) throw new Error("No csrf token found")
-            if(cookies.get("token") === null) {
+            if(cookies.get("token") == null) {
                 ctx.cookies.set("csrf-token", csrfToken)
                 ctx.cookies.set("token", session.token)
             }
@@ -184,13 +184,12 @@ export const authPlugin = ({db}: {db: PrismaClient}): ViteServerBlitzPlugin => {
     }
 }
 
-export const authClientPlugin: ClientPlugin = async (): Promise<{headers: {"csrf-token"?: string}}> => {
+export const authClientPlugin: ClientPlugin<{["csrf-token"]: string}> = ({["csrf-token"]: csrfToken}) => async (): Promise<{headers: {"csrf-token"?: string}}> => {
     if(import.meta.env.SSR) return {headers: {}}
-    console.log("hello")
     const {default: Cookies} = await import("js-cookie")
     return {
         headers: {
-            "csrf-token": Cookies.get("csrf-token")!,
+            "csrf-token": csrfToken,
         }
     }
 }
