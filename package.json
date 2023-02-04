@@ -34,5 +34,9 @@
 	},
 	"prisma": {
 		"schema": "src/db/schema.prisma"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/SBHattarj/vite-blitz"
 	}
 }

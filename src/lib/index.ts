@@ -92,6 +92,7 @@ export function viteBlitz({rpcPathRegex = /\/\[\.\.\.blitz\]\/\+server.[tj]s/, e
     }
 }
 
+
 export interface ViteBlitzCtx {
     cookies: Cookies,
     headers: Headers,
@@ -156,7 +157,8 @@ export const invoke= (async (func: (...args: any) => any, parameter: any) => {
     return await func(parameter, fetch as unknown as ViteBlitzCtx)
 }) as Invoke
 export function internalFetch(blitzParam: string) {
-    return async (param: any, fetch: typeof globalThis.fetch) => {
+    return async (param: any, fetcoh: typeof globalThis.fetch = globalThis.fetch) => {
+
         const {headers} = (await (globalThis as any).__clientPlugin?.()) ?? {headers: {}}
         const response = await fetch(`/rpc/${blitzParam}`, {
                 method: "POST",

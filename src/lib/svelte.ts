@@ -47,7 +47,7 @@ export const createClient: ClientCreator<[{plugins?: ClientPlugin<any>[], server
                 }
                 const {__acquired_cookies__= []} = event.data as {__acquired_cookies__: [string, string][]}
                 const cookies = new Map(__acquired_cookies__) as unknown as Cookies
-                const invoke= (async <Func extends (parameter?: any, ctx?: ViteBlitzCtx) => any>(func: Func, parameter: Parameters<Func>) => {
+                const invoke = (async <Func extends (parameter?: any, ctx?: ViteBlitzCtx) => any>(func: Func, parameter: Parameters<Func>) => {
                     if(!import.meta.env.SSR) return await func(parameter, event.fetch as any)
                     let ctx = {cookies, headers: new Headers()} as ViteBlitzCtx
                     await serverPlugins.reduce(async (prevPromise, plugin) => {
