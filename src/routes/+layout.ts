@@ -1,4 +1,4 @@
-import { loadWithBlitz } from "../client";
+import { loadWithBlitz } from "../client.js";
 import a from "../queries/a";
 
 export const load = loadWithBlitz(async event => {

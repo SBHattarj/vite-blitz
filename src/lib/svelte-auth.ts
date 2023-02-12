@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
-import { authPlugin } from "./auth";
-import type { SvelteServerLoadPlugin } from "./svelte";
+import { authPlugin } from "./auth.js";
+import type { SvelteServerLoadPlugin } from "./svelte.js";
 
 export const svelteAuthPlugin: (arg: {getDB: () => Promise<PrismaClient>}) => SvelteServerLoadPlugin = ({getDB}) => {
     return async (request, cookies, ctx) => {

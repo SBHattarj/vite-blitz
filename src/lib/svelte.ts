@@ -2,8 +2,8 @@ import type { MaybePromise } from "$app/forms"
 import type { Load, RequestHandler, ServerLoad, Cookies } from "@sveltejs/kit"
 import SuperJSON from "superjson"
 import CookieBrowser from "js-cookie"
-import type { createServer, ViteBlitzCtx, ViteBlitzModifier } from "."
-import {initiateClientPlugin, type ClientCreator, type ClientPlugin, type Invoke, type ViteServerBlitzPlugin} from "."
+import type { createServer, ViteBlitzCtx, ViteBlitzModifier } from "./index.js"
+import {initiateClientPlugin, type ClientCreator, type ClientPlugin, type Invoke, type ViteServerBlitzPlugin} from "./index.js"
 
 export type SvelteServerLoadPlugin = (...args: Parameters<ViteServerBlitzPlugin['load']>) => MaybePromise<Awaited<ReturnType<ViteServerBlitzPlugin['load']>> & {neededCookies?: string[]}>
 
@@ -38,7 +38,7 @@ export const createClient: ClientCreator<[{plugins?: ClientPlugin<any>[], server
         },
         loadWithBlitz(load) {
             return async event => {
-                if(!import.meta.env.SSR) {
+                if(!(typeof window === 'undefined')) {
                     initiateClientPlugin(Promise.all(plugins.map(plugin => plugin(Object.fromEntries(event.data?.__acquired_cookies__)))));
                     // window.fetch = event.fetch;
                     (event.data?. __acquired_cookies__ as [string, string][])?.forEach(([name, cookie]) => {
@@ -48,7 +48,7 @@ export const createClient: ClientCreator<[{plugins?: ClientPlugin<any>[], server
                 const {__acquired_cookies__= []} = event.data as {__acquired_cookies__: [string, string][]}
                 const cookies = new Map(__acquired_cookies__) as unknown as Cookies
                 const invoke = (async <Func extends (parameter?: any, ctx?: ViteBlitzCtx) => any>(func: Func, parameter: Parameters<Func>) => {
-                    if(!import.meta.env.SSR) return await func(parameter, event.fetch as any)
+                    if(!(typeof window === 'undefined')) return await func(parameter, event.fetch as any)
                     let ctx = {cookies, headers: new Headers()} as ViteBlitzCtx
                     await serverPlugins.reduce(async (prevPromise, plugin) => {
                         await prevPromise

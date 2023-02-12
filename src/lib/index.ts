@@ -140,7 +140,7 @@ export type ClientCreator<args extends any[], Return = any> = (...args: args) =>
 export type ClientPlugin<T extends any> = ((cookies: T) => MaybePromise<() => Promise<{headers: {[key: string]: string}}>>)
 
 export function initiateClientPlugin<T extends Promise<Awaited<ReturnType<ClientPlugin<any>>>[]>>(plugins: T) {
-    if(import.meta.env.SSR) return
+    if((typeof window === 'undefined')) return
     (globalThis as any).__clientPlugin = async () => {
         return (await Promise.all((await plugins).map(plugin => plugin()))).reduce((prev, next) => ({...prev, ...next}), {header: {}} as {header: {[key: string]: string}})
     }
@@ -153,7 +153,7 @@ export type Invoke = {
     <Func extends (parameter?: any, ctx?: ViteBlitzCtx) => any>(func: Func, parameter: Parameters<Func>[0]): Promise<Awaited<ReturnType<Func>>>,
 }
 export const invoke= (async (func: (...args: any) => any, parameter: any) => {
-    if(import.meta.env.SSR) throw new Error("SSR is not supported, please wrap this code with if(!import.meta.env.SSR) {} block or use it where it may only ran on client")
+    if((typeof window === 'undefined')) throw new Error("SSR is not supported, please wrap this code with if(!(typeof window === 'undefined')) {} block or use it where it may only ran on client")
     return await func(parameter, fetch as unknown as ViteBlitzCtx)
 }) as Invoke
 export function internalFetch(blitzParam: string) {

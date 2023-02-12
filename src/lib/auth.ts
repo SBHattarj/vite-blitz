@@ -1,4 +1,4 @@
-import type {ClientPlugin, ViteBlitzCtx, ViteServerBlitzPlugin} from "."
+import type {ClientPlugin, ViteBlitzCtx, ViteServerBlitzPlugin} from "./index.js"
 import type { PrismaClient, Session, Prisma } from "@prisma/client"
 import {nanoid} from "nanoid"
 import type { Cookies } from "@sveltejs/kit"
@@ -106,7 +106,7 @@ class ContextClass implements ViteBlitzCtx {
         if(session == null) throw new Error("No session by that id")
         await this.db.session.delete({where: {token: this.$token}})
         const {csrfSecret, token} = session
-        const {tokens} = await import("./auth-token")
+        const {tokens} = await import("./auth-token.js")
         this.cookies.set("csrf-token", tokens.create(csrfSecret))
         this.cookies.set("token", token)
         this.$token = token
@@ -129,11 +129,11 @@ class ContextClass implements ViteBlitzCtx {
 
 const generateToken = (size: number = 32) => nanoid(size)
 
-const checkCsrfToken = async (secret: string, csrfToken?: string | null | undefined) => csrfToken != null ? (await import("./auth-token")).tokens.verify(secret, csrfToken) : true
+const checkCsrfToken = async (secret: string, csrfToken?: string | null | undefined) => csrfToken != null ? (await import("./auth-token.js")).tokens.verify(secret, csrfToken) : true
 
 const createSession = async (db: PrismaClient) => {
     const sessionToken = generateToken()
-    const {tokens} = await import("./auth-token")
+    const {tokens} = await import("./auth-token.js")
     const csrfSecret = tokens.secretSync()
     const session = await db.session.create({data: {token: sessionToken, csrfSecret} as any})
     return session
@@ -149,7 +149,7 @@ const getSession = async (token: string | undefined, db: PrismaClient) => {
 const getSessionAndVerify = async (token: string | undefined, csrfToken: string | undefined, db: PrismaClient) => {
     if(token == null && csrfToken != null) throw new Error("CSRF mismatch")
     const session = await getSession(token, db)
-    const {tokens} = await import("./auth-token")
+    const {tokens} = await import("./auth-token.js")
     if(token == null) return {session, csrfToken: tokens.create(session.csrfSecret)}
     return {session, csrfToken}
 }
@@ -172,7 +172,7 @@ export const authPlugin = ({db}: {db: PrismaClient}): ViteServerBlitzPlugin => {
             const session = await getSession(cookies.get("token"), db)
             const {csrfSecret} = session
             if(!(await checkCsrfToken(csrfSecret, request.headers.get("csrf-token")))) throw new Error("Csrf token mismatch")
-            const csrfToken = request.headers.get("csrf-token") == null && cookies.get("token") == null ? (await import("./auth-token")).tokens.create(csrfSecret) : request.headers.get("csrf-token")
+            const csrfToken = request.headers.get("csrf-token") == null && cookies.get("token") == null ? (await import("./auth-token.js")).tokens.create(csrfSecret) : request.headers.get("csrf-token")
             if(csrfToken == null) throw new Error("No csrf token found")
             if(cookies.get("token") == null) {
                 ctx.cookies.set("csrf-token", csrfToken)
@@ -185,7 +185,7 @@ export const authPlugin = ({db}: {db: PrismaClient}): ViteServerBlitzPlugin => {
 }
 
 export const authClientPlugin: ClientPlugin<{["csrf-token"]: string}> = ({["csrf-token"]: csrfToken}) => async (): Promise<{headers: {"csrf-token"?: string}}> => {
-    if(import.meta.env.SSR) return {headers: {}}
+    if((typeof window === 'undefined')) return {headers: {}}
     const {default: Cookies} = await import("js-cookie")
     return {
         headers: {

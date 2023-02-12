@@ -1,4 +1,4 @@
-import { createApi } from "$lib/svelte";
-import { handler } from "../../../server";
+import { createApi } from "vite-blitz/svelte";
+import { handler } from "../../../server.js";
 
 export const POST = createApi(handler)

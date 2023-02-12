@@ -1,8 +1,8 @@
 <script>
     import a from "../queries/a"
-    import "$lib/auth"
-    import { invoke } from "$lib";
-    if(!import.meta.env.SSR) (async () => console.log(await invoke(a, undefined)))()
+    import "vite-blitz/auth"
+    import { invoke } from "vite-blitz";
+    if(!(typeof window === 'undefined')) (async () => console.log(await invoke(a, undefined)))()
 </script>
 <button on:click={async () => console.log(await a())}>button</button>
 <h1>Welcome to your library project</h1>
